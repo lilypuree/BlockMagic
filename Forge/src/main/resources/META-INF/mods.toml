@@ -1,0 +1,25 @@
+modLoader="javafml" #mandatory
+loaderVersion="[38,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+license="MIT"
+[[mods]] #mandatory
+modId="blockchunks" #mandatory
+version="${file.jarVersion}" #mandatory
+displayName="Block Chunks" #mandatory
+# logoFile="multiloader.png" #optional
+credits="Jared&Darkhax's multiloader" #optional
+authors="lilypuree" #optional
+description='''
+'''
+
+[[dependencies.softdrinks]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[38,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.softdrinks]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.18,1.19)"
+    ordering="NONE"
+    side="BOTH"

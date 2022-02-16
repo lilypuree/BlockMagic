@@ -1,0 +1,34 @@
+{
+    "schemaVersion": 1,
+    "id": "blockchunks",
+    "version": "${version}",
+  
+    "name": "Block Chunks",
+    "description": "chunks of blocks",
+    "authors": [
+      "lilypuree"
+    ],
+  
+    "license": "MIT",
+
+    "environment": "*",
+    "entrypoints": {
+      "main": [
+        "lilypuree.blockchunks.BlockChunksFabric"
+      ]
+    },
+    "mixins": [
+      "blockchunks.mixins.json"
+    ],
+  
+    "depends": {
+      "fabricloader": ">=0.12",
+      "fabric": "*",
+      "minecraft": "1.18.x",
+      "java": ">=17"
+    },
+    "suggests": {
+      "another-mod": "*"
+    }
+  }
+  

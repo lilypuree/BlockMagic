@@ -1,0 +1,137 @@
+{
+  "variants": {
+    "facing=down,secondary_facing=down": {
+      "model": "blockchunks:block/slab_down"
+    },
+    "facing=down,secondary_facing=east": {
+      "model": "blockchunks:block/slab_down_east"
+    },
+    "facing=down,secondary_facing=south": {
+      "model": "blockchunks:block/slab_down_east",
+      "y": 90
+    },
+    "facing=down,secondary_facing=west": {
+      "model": "blockchunks:block/slab_down_east",
+      "y": 180
+    },
+    "facing=down,secondary_facing=north": {
+      "model": "blockchunks:block/slab_down_east",
+      "y": 270
+    },
+    "facing=down,secondary_facing=up": {
+      "model": "minecraft:block/tnt"
+    },
+    "facing=up,secondary_facing=up": {
+      "model": "blockchunks:block/slab_up"
+    },
+    "facing=up,secondary_facing=east": {
+      "model": "blockchunks:block/slab_up_east"
+    },
+    "facing=up,secondary_facing=south": {
+      "model": "blockchunks:block/slab_up_east",
+      "y": 90
+    },
+    "facing=up,secondary_facing=west": {
+      "model": "blockchunks:block/slab_up_east",
+      "y": 180
+    },
+    "facing=up,secondary_facing=north": {
+      "model": "blockchunks:block/slab_up_east",
+      "y": 270
+    },
+    "facing=up,secondary_facing=down": {
+      "model": "minecraft:block/tnt"
+    },
+    "facing=east,secondary_facing=east": {
+      "model": "blockchunks:block/slab_east"
+    },
+    "facing=east,secondary_facing=up": {
+      "model": "blockchunks:block/slab_east_up"
+    },
+    "facing=east,secondary_facing=down": {
+      "model": "blockchunks:block/slab_east_down"
+    },
+    "facing=east,secondary_facing=north": {
+      "model": "blockchunks:block/slab_east_north"
+    },
+    "facing=east,secondary_facing=south": {
+      "model": "blockchunks:block/slab_east_south"
+    },
+    "facing=east,secondary_facing=west": {
+      "model": "blockchunks:block/slab_east_full"
+    },
+    "facing=south,secondary_facing=south": {
+      "model": "blockchunks:block/slab_east",
+      "y": 90
+    },
+    "facing=south,secondary_facing=up": {
+      "model": "blockchunks:block/slab_east_up",
+      "y": 90
+    },
+    "facing=south,secondary_facing=down": {
+      "model": "blockchunks:block/slab_east_down",
+      "y": 90
+    },
+    "facing=south,secondary_facing=east": {
+      "model": "blockchunks:block/slab_east_north",
+      "y": 90
+    },
+    "facing=south,secondary_facing=west": {
+      "model": "blockchunks:block/slab_east_south",
+      "y": 90
+    },
+    "facing=south,secondary_facing=north": {
+      "model": "blockchunks:block/slab_east_full",
+      "y": 90
+    },
+    "facing=west,secondary_facing=west": {
+      "model": "blockchunks:block/slab_east",
+      "y": 180
+    },
+    "facing=west,secondary_facing=up": {
+      "model": "blockchunks:block/slab_east_up",
+      "y":  180
+    },
+    "facing=west,secondary_facing=down": {
+      "model": "blockchunks:block/slab_east_down",
+      "y":  180
+    },
+    "facing=west,secondary_facing=south": {
+      "model": "blockchunks:block/slab_east_north",
+      "y":  180
+    },
+    "facing=west,secondary_facing=north": {
+      "model": "blockchunks:block/slab_east_south",
+      "y":  180
+    },
+    "facing=west,secondary_facing=east": {
+      "model": "blockchunks:block/slab_east_full",
+      "y":  180
+    },
+    "facing=north,secondary_facing=north": {
+      "model": "blockchunks:block/slab_east",
+      "y": 270
+    },
+    "facing=north,secondary_facing=up": {
+      "model": "blockchunks:block/slab_east_up",
+      "y": 270
+    },
+    "facing=north,secondary_facing=down": {
+      "model": "blockchunks:block/slab_east_down",
+      "y": 270
+    },
+    "facing=north,secondary_facing=west": {
+      "model": "blockchunks:block/slab_east_north",
+      "y": 270
+    },
+    "facing=north,secondary_facing=east": {
+      "model": "blockchunks:block/slab_east_south",
+      "y": 270
+    },
+    "facing=north,secondary_facing=south": {
+      "model": "blockchunks:block/slab_east_full",
+      "y": 270
+    }
+
+  }
+}

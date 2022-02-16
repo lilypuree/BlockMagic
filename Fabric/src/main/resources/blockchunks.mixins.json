@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "lilypuree.blockchunks.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "RecipeManagerMixin",
+    "ShapelessRecipeAccessor",
+    "TagLoaderMixin",
+    "AdvancementManagerMixin"
+  ],
+  "client": [
+    "ModelBakeryMixin",
+    "ClientLanguageMixin",
+    "MinecraftMixin"
+  ],
+  "server": [
+    "DedicatedServerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+  
