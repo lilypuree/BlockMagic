@@ -1,5 +1,6 @@
-## Soft Drinks
+## Block Magic!
 
-use a bottle on bubble columns to get sparkling/bubbling water!
+Automatically registered building blocks
 
-soul sand
+Needs refactoring
+

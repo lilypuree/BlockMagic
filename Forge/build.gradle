@@ -35,7 +35,7 @@ minecraft {
             workingDirectory project.file('run')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Client'
-            arg "--mixin=blockchunks.mixins.json"
+            arg "--mixin=blockmagic.mixins.json"
 
             property 'forge.logging.console.level', 'debug'
 
@@ -51,7 +51,7 @@ minecraft {
             workingDirectory project.file('run')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Server'
-            arg "--mixin=blockchunks.mixins.json"
+            arg "--mixin=blockmagic.mixins.json"
 
             mods {
                 modServerRun {

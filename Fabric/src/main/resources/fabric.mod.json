@@ -1,34 +1,31 @@
 {
-    "schemaVersion": 1,
-    "id": "blockchunks",
-    "version": "${version}",
-  
-    "name": "Block Chunks",
-    "description": "chunks of blocks",
-    "authors": [
-      "lilypuree"
-    ],
-  
-    "license": "MIT",
-
-    "environment": "*",
-    "entrypoints": {
-      "main": [
-        "lilypuree.blockchunks.BlockChunksFabric"
-      ]
-    },
-    "mixins": [
-      "blockchunks.mixins.json"
-    ],
-  
-    "depends": {
-      "fabricloader": ">=0.12",
-      "fabric": "*",
-      "minecraft": "1.18.x",
-      "java": ">=17"
-    },
-    "suggests": {
-      "another-mod": "*"
-    }
+  "schemaVersion": 1,
+  "id": "blockmagic",
+  "version": "${version}",
+  "name": "Block Magic",
+  "description": "automatically loaded building blocks",
+  "authors": [
+    "lilypuree"
+  ],
+  "license": "MIT",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "lilypuree.blockmagic.BlockMagicFabric"
+    ]
+  },
+  "mixins": [
+    "blockmagic.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.12",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
   }
+}
   
