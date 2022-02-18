@@ -13,8 +13,8 @@ public class DedicatedServerMixin {
 
     @Inject(method = "initServer", at = @At("RETURN"))
     private void onInitServer(CallbackInfoReturnable<Boolean> cir) {
-        if (cir.getReturnValue() && ReferenceHolder.INSTANCE.notLoaded()) {
-            CommonMod.scan();
+        if (cir.getReturnValue()) {
+            CommonMod.writeScanResults();
         }
     }
 }

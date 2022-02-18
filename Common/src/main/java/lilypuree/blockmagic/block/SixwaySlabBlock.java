@@ -26,7 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SixwaySlabBlock extends Block implements SimpleWaterloggedBlock {
+public class SixwaySlabBlock extends DeferredBehaviorBlock implements SimpleWaterloggedBlock {
 
     public static final DirectionProperty FACE = BlockStateProperties.FACING;
     public static final DirectionProperty SECONDARY_FACING = ModBlockProperties.SECONDARY_FACING;
@@ -43,8 +43,8 @@ public class SixwaySlabBlock extends Block implements SimpleWaterloggedBlock {
     };
     protected static VoxelShape[][] shapeArray;
 
-    public SixwaySlabBlock(Properties properties) {
-        super(properties);
+    public SixwaySlabBlock() {
+        super();
         this.registerDefaultState(this.getStateDefinition().any().setValue(FACE, Direction.DOWN).setValue(WATERLOGGED, false).setValue(SECONDARY_FACING, Direction.DOWN));
         shapeArray = getShapeArray();
     }

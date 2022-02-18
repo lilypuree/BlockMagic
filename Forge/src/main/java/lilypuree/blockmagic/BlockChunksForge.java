@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -16,13 +17,11 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 @Mod(value = Constants.MOD_ID)
 public class BlockChunksForge {
     public BlockChunksForge() {
+        CommonMod.onModConstruction();
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
-        if (CommonMod.load()) {
-            modbus.addGenericListener(Item.class, (RegistryEvent.Register<Item> e) -> Registration.registerItems(new RegistryHelperForge<>(e.getRegistry())));
-            modbus.addGenericListener(Block.class, (RegistryEvent.Register<Block> e) -> Registration.registerBlocks(new RegistryHelperForge<>(e.getRegistry())));
-        } else {
-            modbus.addListener((FMLCommonSetupEvent e) -> e.enqueueWork(CommonMod::scan));
-        }
+        modbus.addGenericListener(Item.class, (RegistryEvent.Register<Item> e) -> Registration.registerItems(new RegistryHelperForge<>(e.getRegistry())));
+        modbus.addGenericListener(Block.class, (RegistryEvent.Register<Block> e) -> Registration.registerBlocks(new RegistryHelperForge<>(e.getRegistry())));
+        modbus.addListener((FMLCommonSetupEvent e) -> e.enqueueWork(CommonMod::writeScanResults));
     }
 
     public static class RegistryHelperForge<T extends IForgeRegistryEntry<T>> implements RegistryHelper<T> {

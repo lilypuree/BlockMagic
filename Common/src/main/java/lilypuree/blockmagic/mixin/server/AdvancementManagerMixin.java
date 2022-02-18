@@ -1,10 +1,11 @@
-package lilypuree.blockmagic.mixin;
+package lilypuree.blockmagic.mixin.server;
 
+import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import lilypuree.blockmagic.CommonMod;
 import lilypuree.blockmagic.Constants;
-import lilypuree.blockmagic.core.ReferenceHolder;
-import lilypuree.blockmagic.core.SixwaySlabReference;
+import lilypuree.blockmagic.core.BlockReference;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerAdvancementManager;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.StringReader;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Mixin(ServerAdvancementManager.class)
 public class AdvancementManagerMixin {
@@ -37,13 +39,14 @@ public class AdvancementManagerMixin {
 
     @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "HEAD"))
     private void onApply(Map<ResourceLocation, JsonElement> jsonMap, ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfo ci) {
-        for (SixwaySlabReference reference : ReferenceHolder.INSTANCE.sixwaySlabs()) {
-            String recipeName = reference.getRegistryName().toString();
+        for (BlockReference reference : CommonMod.SIXWAY_SLABS.values()) {
+            ResourceLocation registryName = reference.getRegistryName();
+            String recipeName = registryName.toString();
             String itemName = Registry.ITEM.getKey(reference.getOriginBlock().asItem()).toString();
 
             String advancementString = advancementTemplate.formatted(recipeName, itemName, recipeName);
             JsonElement element = GsonHelper.fromJson(GSON, new StringReader(advancementString), JsonElement.class);
-            jsonMap.put(new ResourceLocation(Constants.MOD_ID, "recipes/building_blocks/" + reference.getRegistryName().getPath()), element);
+            jsonMap.put(new ResourceLocation(registryName.getNamespace(), "recipes/building_blocks/" + registryName.getPath()), element);
         }
     }
 }

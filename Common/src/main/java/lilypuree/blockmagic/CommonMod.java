@@ -1,73 +1,39 @@
 package lilypuree.blockmagic;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
 import lilypuree.blockmagic.core.ReferenceHolder;
-import lilypuree.blockmagic.platform.Services;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SlabBlock;
 import org.apache.logging.log4j.Level;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
 public class CommonMod {
-    public static Gson GSON;
+    public static Set<ResourceLocation> SLAB_BLOCKS = new HashSet<>();
+    public static Configuration SIXWAY_SLAB_CONFIG = new Configuration("sixway_slab");
+    public static ReferenceHolder SIXWAY_SLABS;
+
+    private static Duration timeTaken = Duration.ZERO;
+
+    public static void addTime(Duration duration) {
+        timeTaken = timeTaken.plus(duration);
+    }
 
     static {
-        GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
-        builder.registerTypeAdapter(ReferenceHolder.class, new ReferenceHolder.Serializer());
-        GSON = builder.create();
+        Configuration.RawData data = SIXWAY_SLAB_CONFIG.read();
+        SIXWAY_SLABS = new ReferenceHolder(data.generated(), data.whiteList(), data.blackList());
     }
 
-    public static boolean load() {
-        Path configPath = Services.PLATFORM.getConfigPath().resolve("sixway_slabs.json");
-        if (Files.exists(configPath)) {
-            try {
-                BufferedReader reader = Files.newBufferedReader(configPath);
-                ReferenceHolder.INSTANCE = GSON.fromJson(reader, ReferenceHolder.class);
-                reader.close();
-                return true;
-            } catch (IOException | JsonParseException e) {
-                Constants.LOG.log(Level.ERROR, e.getMessage());
-            }
-        }
-        ReferenceHolder.INSTANCE = new ReferenceHolder(Collections.emptySet());
-        return false;
+    public static void onModConstruction() {
+//        Configuration.RawData data = SIXWAY_SLAB_CONFIG.read();
+//        SIXWAY_SLABS = new ReferenceHolder(data.generated(), data.whiteList(), data.blackList());
     }
 
-    public static void scan() {
-        Set<ResourceLocation> originBlocks = new HashSet<>();
-        int i = 0;
-        for (Block block : Registry.BLOCK) {
-            if (block instanceof SlabBlock) {
-                originBlocks.add(Registry.BLOCK.getKey(block));
-                i++;
-            }
-        }
-        Constants.LOG.log(Level.INFO, "{} found {} slab blocks", Constants.MOD_NAME, i);
-        serialize(new ReferenceHolder(originBlocks));
-    }
-
-    private static void serialize(ReferenceHolder config) {
-        Path configPath = Services.PLATFORM.getConfigPath().resolve("sixway_slabs.json");
-        try {
-            Files.createDirectories(configPath.getParent());
-            BufferedWriter writer = Files.newBufferedWriter(configPath);
-            GSON.toJson(config, writer);
-            writer.close();
-        } catch (IOException e) {
-            Constants.LOG.log(Level.ERROR, e.getMessage());
+    public static void writeScanResults() {
+        Constants.LOG.info("Time taken to resolve blocks: " + timeTaken.toMillis() + " ms");
+        if (!SIXWAY_SLAB_CONFIG.scanningDisabled()) {
+            SIXWAY_SLAB_CONFIG.write(SLAB_BLOCKS);
+            Constants.LOG.log(Level.INFO, "{} found {} slab blocks", Constants.MOD_NAME, SLAB_BLOCKS.size());
         }
     }
 }

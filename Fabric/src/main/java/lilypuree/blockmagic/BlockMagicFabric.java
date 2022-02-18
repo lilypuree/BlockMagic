@@ -9,10 +9,9 @@ import net.minecraft.resources.ResourceLocation;
 public class BlockMagicFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        if (CommonMod.load()) {
-            Registration.registerBlocks(new RegistryHelperFabric<>(Registry.BLOCK));
-            Registration.registerItems(new RegistryHelperFabric<>(Registry.ITEM));
-        }
+        CommonMod.onModConstruction();
+        Registration.registerBlocks(new RegistryHelperFabric<>(Registry.BLOCK));
+        Registration.registerItems(new RegistryHelperFabric<>(Registry.ITEM));
     }
 
     public static class RegistryHelperFabric<T> implements RegistryHelper<T> {

@@ -1,7 +1,7 @@
 package lilypuree.blockmagic.client;
 
 import lilypuree.blockmagic.Constants;
-import lilypuree.blockmagic.core.SixwaySlabReference;
+import lilypuree.blockmagic.core.BlockReference;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
 
@@ -17,7 +17,7 @@ public class SixwaySlabModelHelper {
         return BlockModel.fromString(model);
     }
 
-    public static BlockModel getItemModel(SixwaySlabReference reference) {
+    public static BlockModel getItemModel(BlockReference reference) {
         ResourceLocation parent = new ResourceLocation(Constants.MOD_ID, "block/" + reference.getBaseName() + "_slab_down");
         String item_model = String.format(template_item, parent);
         return BlockModel.fromString(item_model);

@@ -13,8 +13,6 @@ public class MinecraftMixin {
 
     @Inject(method = "run", at = @At("HEAD"))
     private void onInit(CallbackInfo ci) {
-        if (ReferenceHolder.INSTANCE.notLoaded()) {
-            CommonMod.scan();
-        }
+        CommonMod.writeScanResults();
     }
 }

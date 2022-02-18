@@ -16,14 +16,18 @@ import java.util.Map;
 
 import static net.minecraft.core.Direction.*;
 
-public class SixwaySlabBlockDefinition {
+public class SixwaySlabBlockDefinition implements BlockDefinitionProvider {
 
     private ResourceLocation defaultModel;
     private String baseName;
-    public Map<String, MultiVariant> variants = new HashMap<>();
+    private Map<String, MultiVariant> variants = new HashMap<>();
 
-    public SixwaySlabBlockDefinition(String baseName, ResourceLocation defaultModel) {
+    public SixwaySlabBlockDefinition(String baseName) {
         this.baseName = baseName;
+    }
+
+    @Override
+    public Map<String, MultiVariant> getVariants(ResourceLocation defaultModel) {
         this.defaultModel = defaultModel;
 
         add(DOWN, UP, "", 0);
@@ -41,6 +45,7 @@ public class SixwaySlabBlockDefinition {
             add(horizontal, horizontal.getCounterClockWise(), "east_north", rotation);
             add(horizontal, horizontal.getClockWise(), "east_south", rotation);
         }
+        return variants;
     }
 
     private void add(Direction facing, Direction secondary, String modelSuffix, int rotation) {

@@ -5,14 +5,18 @@
   "refmap": "blockmagic.refmap.json",
   "minVersion": "0.8",
   "mixins": [
-    "RecipeManagerMixin",
+    "server.RecipeManagerMixin",
     "ShapelessRecipeAccessor",
-    "TagLoaderMixin",
-    "AdvancementManagerMixin"
+    "server.TagLoaderMixin",
+    "server.AdvancementManagerMixin",
+    "BlockBehaviorAccessor",
+    "BlockStateBaseAccessor",
+    "PropertiesAccessor",
+    "RegistryMixin"
   ],
   "client": [
-    "ModelBakeryMixin",
-    "ClientLanguageMixin"
+    "client.ModelBakeryMixin",
+    "client.ClientLanguageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

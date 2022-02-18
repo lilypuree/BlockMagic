@@ -1,14 +1,15 @@
-package lilypuree.blockmagic.mixin;
+package lilypuree.blockmagic.mixin.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import lilypuree.blockmagic.CommonMod;
 import lilypuree.blockmagic.Constants;
+import lilypuree.blockmagic.client.BlockDefinitionProvider;
 import lilypuree.blockmagic.client.SixwaySlabBlockDefinition;
 import lilypuree.blockmagic.client.SixwaySlabModelHelper;
-import lilypuree.blockmagic.core.ReferenceHolder;
-import lilypuree.blockmagic.core.SixwaySlabReference;
+import lilypuree.blockmagic.core.BlockReference;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.MultiVariant;
@@ -55,21 +56,18 @@ public abstract class ModelBakeryMixin {
     @Final
     public static ModelResourceLocation MISSING_MODEL_LOCATION;
 
-    @Shadow
-    public abstract BakedModel bake(ResourceLocation $$0, ModelState $$1);
-
     @Inject(method = "loadModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/model/BlockModelDefinition$Context;setDefinition(Lnet/minecraft/world/level/block/state/StateDefinition;)V"), cancellable = true)
     private void onLoadModel(ResourceLocation location, CallbackInfo ci) {
         if (location.getNamespace().equals(Constants.MOD_ID)) {
             ResourceLocation newLocation = new ResourceLocation(location.getNamespace(), location.getPath());
-            ReferenceHolder.INSTANCE.getSixwaySlab(newLocation).ifPresent(reference -> {
-                loadSixwaySlab(reference);
+            CommonMod.SIXWAY_SLABS.getFromID(newLocation).ifPresent(reference -> {
+                loadSixwaySlab(reference, new SixwaySlabBlockDefinition(reference.getBaseName()));
                 ci.cancel();
             });
         }
     }
 
-    private void loadSixwaySlab(SixwaySlabReference reference) {
+    private void loadSixwaySlab(BlockReference reference, BlockDefinitionProvider blockDefinitionProvider) {
         StateDefinition<Block, BlockState> stateDefinition = reference.getBlock().getStateDefinition();
 
         //create a map of all possible model resource locations from each blockstate to blockstates
@@ -80,8 +78,7 @@ public abstract class ModelBakeryMixin {
         Map<BlockState, UnbakedModel> statesToUnbakedModels = new IdentityHashMap<>();
         ResourceLocation defaultModel = getDefaultModel(reference.getOriginBlock());
 
-        SixwaySlabBlockDefinition definition = new SixwaySlabBlockDefinition(reference.getBaseName(), defaultModel);
-        definition.variants.forEach((properties, variant) -> {
+        blockDefinitionProvider.getVariants(defaultModel).forEach((properties, variant) -> {
             possibleStates.stream().filter(predicate(stateDefinition, properties)).forEach(state -> {
                 statesToUnbakedModels.put(state, variant);
             });
@@ -100,7 +97,7 @@ public abstract class ModelBakeryMixin {
         if (location.getNamespace().equals(Constants.MOD_ID)) {
             String[] parts = location.getPath().split("/");
             if (parts[0].equals("item")) {
-                ReferenceHolder.INSTANCE.getSixwaySlab(new ResourceLocation(Constants.MOD_ID, parts[1])).map(SixwaySlabModelHelper::getItemModel)
+                CommonMod.SIXWAY_SLABS.getFromID(new ResourceLocation(Constants.MOD_ID, parts[1])).map(SixwaySlabModelHelper::getItemModel)
                         .ifPresent(model -> {
                             model.name = location.toString();
                             cir.setReturnValue(model);
@@ -111,7 +108,7 @@ public abstract class ModelBakeryMixin {
                 String slabType = parts[1].substring(suffixIndex);
                 String baseName = parts[1].substring(0, suffixIndex - 1); //remove the underscore
 
-                ReferenceHolder.INSTANCE.getSixwaySlab(baseName).ifPresent(reference -> {
+                CommonMod.SIXWAY_SLABS.getFromBaseName(baseName).ifPresent(reference -> {
                     BlockModel model = createBlockModel(slabType, reference);
                     if (model != null) {
                         model.name = location.toString();
@@ -123,7 +120,7 @@ public abstract class ModelBakeryMixin {
     }
 
 
-    private BlockModel createBlockModel(String slabType, SixwaySlabReference reference) {
+    private BlockModel createBlockModel(String slabType, BlockReference reference) {
         ResourceLocation parentModel = getDefaultModel(reference.getOriginBlock());
         UnbakedModel parent = this.getModel(parentModel);
         if (parent instanceof BlockModel blockParent) {

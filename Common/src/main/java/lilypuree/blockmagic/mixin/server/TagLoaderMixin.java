@@ -1,9 +1,11 @@
-package lilypuree.blockmagic.mixin;
+package lilypuree.blockmagic.mixin.server;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import lilypuree.blockmagic.core.ReferenceHolder;
-import lilypuree.blockmagic.core.SixwaySlabReference;
+import lilypuree.blockmagic.CommonMod;
+import lilypuree.blockmagic.Constants;
+import lilypuree.blockmagic.core.BlockReference;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -18,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -65,7 +68,7 @@ public abstract class TagLoaderMixin {
 
     private void addAllSixwaySlabs(Map<ResourceLocation, Tag.Builder> builders, Multimap<ResourceLocation, ResourceLocation> dependencyNames, ResourceLocation tagName) {
         Tag.Builder builder = builders.get(tagName);
-        for (SixwaySlabReference reference : ReferenceHolder.INSTANCE.sixwaySlabs()) {
+        for (BlockReference reference : CommonMod.SIXWAY_SLABS.values()) {
             String originName = reference.getOrigin().toString();
             boolean[] contains = new boolean[]{false};
             visitDependenciesAndElement(builders, dependencyNames, Sets.newHashSet(), tagName, (name, childBuilder) -> {

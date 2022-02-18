@@ -4,14 +4,18 @@
   "package": "lilypuree.blockmagic.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "RecipeManagerMixin",
+    "server.RecipeManagerMixin",
     "ShapelessRecipeAccessor",
-    "TagLoaderMixin",
-    "AdvancementManagerMixin"
+    "server.TagLoaderMixin",
+    "server.AdvancementManagerMixin",
+    "RegistryMixin",
+    "BlockBehaviorAccessor",
+    "BlockStateBaseAccessor",
+    "PropertiesAccessor"
   ],
   "client": [
-    "ModelBakeryMixin",
-    "ClientLanguageMixin",
+    "client.ModelBakeryMixin",
+    "client.ClientLanguageMixin",
     "MinecraftMixin"
   ],
   "server": [

@@ -1,10 +1,13 @@
-package lilypuree.blockmagic.mixin;
+package lilypuree.blockmagic.mixin.server;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import lilypuree.blockmagic.core.ReferenceHolder;
-import lilypuree.blockmagic.core.SixwaySlabReference;
+import lilypuree.blockmagic.CommonMod;
+import lilypuree.blockmagic.Constants;
+import lilypuree.blockmagic.core.BlockReference;
+import lilypuree.blockmagic.mixin.ShapelessRecipeAccessor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -13,7 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.block.SlabBlock;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.io.StringReader;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
@@ -45,23 +49,23 @@ public abstract class RecipeManagerMixin {
     //injects all recipes into the map before other recipes are made
     @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "HEAD"))
     private void onApply(Map<ResourceLocation, JsonElement> map, ResourceManager manager, ProfilerFiller filler, CallbackInfo ci) {
-        for (SixwaySlabReference reference : ReferenceHolder.INSTANCE.sixwaySlabs()) {
+        for (BlockReference reference : CommonMod.SIXWAY_SLABS.values()) {
             ResourceLocation recipeName = reference.getRegistryName();
             String ingredient = reference.getOrigin().toString();
             String result = reference.getRegistryName().toString();
-            String recipeString = reference.isOriginSlab() ? shapeless_template.formatted(ingredient, result) : shaped_template.formatted(ingredient, result);
+            String recipeString = reference.getOriginBlock() instanceof SlabBlock ? shapeless_template.formatted(ingredient, result) : shaped_template.formatted(ingredient, result);
             JsonElement element = GsonHelper.fromJson(GSON, new StringReader(recipeString), JsonElement.class);
             map.put(recipeName, element);
         }
     }
 
-    //fix the group names based on the recip for the original slab
+    //fix the group names based on the recipe for the original slab
     //runs after all other recipes are made
     @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableMap$Builder;build()Lcom/google/common/collect/ImmutableMap;"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onRecipeBuild(Map<ResourceLocation, JsonElement> map, ResourceManager manager, ProfilerFiller filler, CallbackInfo ci, Map<RecipeType<?>, ImmutableMap.Builder<ResourceLocation, Recipe<?>>> builderMap, ImmutableMap.Builder<ResourceLocation, Recipe<?>> byNameMap) {
         Map<Item, Recipe<?>> slabRecipes = new IdentityHashMap<>();
-        for (SixwaySlabReference reference : ReferenceHolder.INSTANCE.sixwaySlabs()) {
-            if (reference.isOriginSlab()) {
+        for (BlockReference reference : CommonMod.SIXWAY_SLABS.values()) {
+            if (reference.getOriginBlock() instanceof SlabBlock) {
                 Recipe<?> recipe = this.recipes.get(RecipeType.CRAFTING).get(reference.getRegistryName());
                 slabRecipes.put(reference.getOriginBlock().asItem(), recipe);
             }

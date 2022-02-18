@@ -1,84 +1,55 @@
 package lilypuree.blockmagic.core;
 
-import com.google.gson.*;
 import lilypuree.blockmagic.Constants;
-import net.minecraft.core.Registry;
+import lilypuree.blockmagic.block.SixwaySlabBlock;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.Level;
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class ReferenceHolder {
     public static String SIXWAY_SLAB = "sixway_slab";
-    public static ReferenceHolder INSTANCE;
-    private Map<String, SixwaySlabReference> sixwaySlabReferences;
+    private Map<String, BlockReference> sixwaySlabReferences;
+    private Set<ResourceLocation> origins;
 
-    public ReferenceHolder(Set<ResourceLocation> originBlocks) {
+    public ReferenceHolder(Set<ResourceLocation> generated, Set<ResourceLocation> whitelist, Set<ResourceLocation> blacklist) {
         sixwaySlabReferences = new HashMap<>();
-        originBlocks.stream().map(SixwaySlabReference::new).forEach(reference -> {
-            sixwaySlabReferences.put(reference.getBaseName(), reference);
-        });
+        generated.removeAll(blacklist);
+        for (ResourceLocation blacklisted : blacklist) {
+            if (whitelist.remove(blacklisted)) {
+                Constants.LOG.log(Level.ERROR, "Duplicate entry {} in blacklist/whitelist", blacklisted);
+            }
+        }
+        generated.addAll(whitelist);
+        origins = generated;
+        for (ResourceLocation originID : origins) {
+            String baseName = getBaseName(originID);
+            sixwaySlabReferences.put(baseName, new BlockReference(originID, baseName, SIXWAY_SLAB, new SixwaySlabBlock()));
+        }
     }
 
-    public boolean notLoaded() {
-        return true;
-    }
-
-    public Optional<SixwaySlabReference> getSixwaySlab(String baseName) {
-        return Optional.ofNullable(sixwaySlabReferences.get(baseName));
-    }
-
-    public Collection<SixwaySlabReference> sixwaySlabs() {
+    public Collection<BlockReference> values() {
         return sixwaySlabReferences.values();
     }
 
-    public Optional<SixwaySlabReference> getSixwaySlab(ResourceLocation registryName) {
-        if (registryName.getNamespace().equals(Constants.MOD_ID)) {
-            String baseName = registryName.getPath().replace("_" + SIXWAY_SLAB, "");
-            return Optional.ofNullable(sixwaySlabReferences.get(baseName));
-        }
-        return Optional.empty();
+    public boolean containsParent(ResourceLocation id) {
+        return origins.contains(id);
     }
 
-    public void checkValidity() {
-        Iterator<SixwaySlabReference> it = sixwaySlabReferences.values().iterator();
-        while (it.hasNext()) {
-            SixwaySlabReference reference = it.next();
-            if (!Registry.BLOCK.containsKey(reference.getOrigin())) {
-                Constants.LOG.log(Level.ERROR, "{} is not a registered block!", reference.getOrigin());
-                it.remove();
-            }
-        }
+    public Optional<BlockReference> getFromBaseName(String baseName) {
+        return Optional.ofNullable(sixwaySlabReferences.get(baseName));
     }
 
-    public static class Serializer implements JsonSerializer<ReferenceHolder>, JsonDeserializer<ReferenceHolder> {
-        @Override
-        public ReferenceHolder deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            Set<ResourceLocation> originBlocks = new HashSet<>();
-            if (json.isJsonObject()) {
-                JsonElement elements = json.getAsJsonObject().get("source_blocks");
-                if (elements.isJsonArray()) {
-                    elements.getAsJsonArray().forEach(entry -> {
-                        originBlocks.add(new ResourceLocation(entry.getAsString()));
-                    });
-                }
-            }
-            return new ReferenceHolder(originBlocks) {
-                @Override
-                public boolean notLoaded() {
-                    return false;
-                }
-            };
-        }
+    public BlockReference getFromParentID(ResourceLocation id) {
+        return getFromBaseName(getBaseName(id)).get();
+    }
 
-        @Override
-        public JsonElement serialize(ReferenceHolder src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonArray array = new JsonArray(src.sixwaySlabReferences.size());
-            src.sixwaySlabs().forEach(reference -> array.add(reference.getOrigin().toString()));
-            JsonObject map = new JsonObject();
-            map.add("source_blocks", array);
-            return map;
-        }
+    public Optional<BlockReference> getFromID(ResourceLocation registryName) {
+        String baseName = registryName.getPath().replace("_" + SIXWAY_SLAB, "");
+        return getFromBaseName(baseName);
+    }
+
+    public String getBaseName(ResourceLocation origin) {
+        return origin.getPath().replace("_slab", "");
     }
 }
