@@ -12,7 +12,8 @@
     "BlockBehaviorAccessor",
     "BlockStateBaseAccessor",
     "PropertiesAccessor",
-    "RegistryMixin"
+    "ForgeRegistryMixin",
+    "ItemBlockRenderTypesMixin"
   ],
   "client": [
     "client.ModelBakeryMixin",

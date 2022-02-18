@@ -5,11 +5,11 @@ import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.Level;
 
 import java.time.Duration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommonMod {
-    public static Set<ResourceLocation> SLAB_BLOCKS = new HashSet<>();
+    public static List<ResourceLocation> SLAB_BLOCKS = new ArrayList<>();
     public static Configuration SIXWAY_SLAB_CONFIG = new Configuration("sixway_slab");
     public static ReferenceHolder SIXWAY_SLABS;
 
@@ -24,9 +24,7 @@ public class CommonMod {
         SIXWAY_SLABS = new ReferenceHolder(data.generated(), data.whiteList(), data.blackList());
     }
 
-    public static void onModConstruction() {
-//        Configuration.RawData data = SIXWAY_SLAB_CONFIG.read();
-//        SIXWAY_SLABS = new ReferenceHolder(data.generated(), data.whiteList(), data.blackList());
+    public static void init() {
     }
 
     public static void writeScanResults() {

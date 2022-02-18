@@ -14,14 +14,19 @@ import net.minecraft.world.level.material.Material;
 import org.apache.logging.log4j.Level;
 
 public class DeferredBehaviorBlock extends Block {
-
+    private Block parentBlock;
     public static BlockBehaviour.Properties DEFAULT = Properties.of(Material.AIR);
 
     public DeferredBehaviorBlock() {
         super(DEFAULT);
     }
 
+    public Block getParentBlock() {
+        return parentBlock;
+    }
+
     public Block resolve(Block parentBlock) {
+        this.parentBlock = parentBlock;
         Properties property = Properties.copy(parentBlock);
         BlockBehaviorAccessor parent = ((BlockBehaviorAccessor) parentBlock);
         BlockBehaviorAccessor accessor = ((BlockBehaviorAccessor) this);

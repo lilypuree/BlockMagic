@@ -18,7 +18,6 @@ import static net.minecraft.core.Direction.*;
 
 public class SixwaySlabBlockDefinition implements BlockDefinitionProvider {
 
-    private ResourceLocation defaultModel;
     private String baseName;
     private Map<String, MultiVariant> variants = new HashMap<>();
 
@@ -27,11 +26,9 @@ public class SixwaySlabBlockDefinition implements BlockDefinitionProvider {
     }
 
     @Override
-    public Map<String, MultiVariant> getVariants(ResourceLocation defaultModel) {
-        this.defaultModel = defaultModel;
-
-        add(DOWN, UP, "", 0);
-        add(UP, DOWN, "", 0);
+    public Map<String, MultiVariant> getVariants() {
+        add(DOWN, UP, "full", 0);
+        add(UP, DOWN, "full", 0);
         add(DOWN, DOWN, "down", 0);
         add(UP, UP, "up", 0);
         for (Direction horizontal : Plane.HORIZONTAL) {
@@ -51,7 +48,7 @@ public class SixwaySlabBlockDefinition implements BlockDefinitionProvider {
     private void add(Direction facing, Direction secondary, String modelSuffix, int rotation) {
         String property = String.format("%s=%s,%s=%s", BlockStateProperties.FACING.getName(), facing, ModBlockProperties.SECONDARY_FACING.getName(), secondary);
         BlockModelRotation modelRotation = BlockModelRotation.by(0, rotation);
-        ResourceLocation modelLocation = modelSuffix.isEmpty() ? defaultModel : new ResourceLocation(Constants.MOD_ID, "block/" + baseName + "_slab_" + modelSuffix);
+        ResourceLocation modelLocation = new ResourceLocation(Constants.MOD_ID, "block/" + baseName + "_slab_" + modelSuffix);
         Variant variant = new Variant(modelLocation, modelRotation.getRotation(), false, 1);
         variants.put(property, new MultiVariant(List.of(variant)));
     }

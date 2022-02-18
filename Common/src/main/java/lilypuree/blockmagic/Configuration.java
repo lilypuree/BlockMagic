@@ -1,6 +1,7 @@
 package lilypuree.blockmagic;
 
 import com.google.gson.*;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lilypuree.blockmagic.platform.Services;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -11,7 +12,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -45,9 +48,9 @@ public class Configuration {
 
     public RawData read() {
         boolean[] disableScanning = new boolean[]{false};
-        Set<ResourceLocation> generated = new HashSet<>();
-        Set<ResourceLocation> whiteList = new HashSet<>();
-        Set<ResourceLocation> blackList = new HashSet<>();
+        Set<ResourceLocation> generated = new LinkedHashSet<>();
+        Set<ResourceLocation> whiteList = new LinkedHashSet<>();
+        Set<ResourceLocation> blackList = new LinkedHashSet<>();
         loadJsonObject(configFile, json -> {
             loadSet(json, "whitelist", whiteList);
             loadSet(json, "blacklist", blackList);
@@ -60,7 +63,7 @@ public class Configuration {
         return new RawData(generated, whiteList, blackList);
     }
 
-    public void write(Set<ResourceLocation> generated) {
+    public void write(Collection<ResourceLocation> generated) {
         writeToPath(configFile, true, () -> {
             JsonObject map = new JsonObject();
             map.add("whitelist", new JsonArray());
@@ -77,7 +80,7 @@ public class Configuration {
         });
     }
 
-    private void loadSet(JsonObject json, String key, Set<ResourceLocation> dest) throws JsonParseException {
+    private void loadSet(JsonObject json, String key, Collection<ResourceLocation> dest) throws JsonParseException {
         if (json.has(key)) {
             JsonArray array = GsonHelper.getAsJsonArray(json, key);
             array.forEach(element -> {

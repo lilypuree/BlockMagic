@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.Block;
 
 public class BlockReference {
 
-    private Block originBlock;
     private DeferredBehaviorBlock block;
     private String baseName;
     private ResourceLocation origin;
@@ -36,7 +35,7 @@ public class BlockReference {
     }
 
     public Block getOriginBlock() {
-        return originBlock;
+        return block.getParentBlock();
     }
 
     public Block getBlock() {
@@ -49,8 +48,6 @@ public class BlockReference {
     }
 
     public void resolve(Block parentBlock) {
-
-        this.originBlock = parentBlock;
         this.block.resolve(parentBlock);
     }
 }

@@ -3,7 +3,6 @@ package lilypuree.blockmagic.mixin.client;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.datafixers.util.Pair;
 import lilypuree.blockmagic.CommonMod;
 import lilypuree.blockmagic.Constants;
 import lilypuree.blockmagic.client.BlockDefinitionProvider;
@@ -14,6 +13,8 @@ import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.MultiVariant;
 import net.minecraft.client.renderer.block.model.multipart.MultiPart;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -33,8 +34,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
+
+import static net.minecraft.client.resources.model.ModelBakery.MISSING_MODEL_LOCATION;
 
 @Mixin(ModelBakery.class)
 public abstract class ModelBakeryMixin {
@@ -52,9 +54,20 @@ public abstract class ModelBakeryMixin {
     @Shadow
     protected abstract void registerModelGroup(Iterable<BlockState> $$0);
 
-    @Shadow
-    @Final
-    public static ModelResourceLocation MISSING_MODEL_LOCATION;
+    private UnbakedModel parentModel = null;
+
+    /**
+     * Before the blockstate models are loaded, load the parent model first, and save the result to use later
+     */
+    @Inject(method = "loadTopLevel", at = @At("HEAD"))
+    private void onLoadTopLevel(ModelResourceLocation location, CallbackInfo ci) {
+        if (location.getNamespace().equals(Constants.MOD_ID)) {
+            ResourceLocation newLocation = new ResourceLocation(location.getNamespace(), location.getPath());
+            parentModel = CommonMod.SIXWAY_SLABS.getFromID(newLocation).map(reference -> {
+                return getDefaultModel(reference.getOriginBlock());
+            }).map(this::getModel).orElse(null);
+        }
+    }
 
     @Inject(method = "loadModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/model/BlockModelDefinition$Context;setDefinition(Lnet/minecraft/world/level/block/state/StateDefinition;)V"), cancellable = true)
     private void onLoadModel(ResourceLocation location, CallbackInfo ci) {
@@ -67,6 +80,10 @@ public abstract class ModelBakeryMixin {
         }
     }
 
+    /**
+     * cache and queue dependencies for all states of the given Block
+     * uses the BlockDefinitionProvider to obtain MultiVariants for each state
+     */
     private void loadSixwaySlab(BlockReference reference, BlockDefinitionProvider blockDefinitionProvider) {
         StateDefinition<Block, BlockState> stateDefinition = reference.getBlock().getStateDefinition();
 
@@ -76,9 +93,8 @@ public abstract class ModelBakeryMixin {
         possibleStates.forEach((state) -> modelLocationBlockStateMap.put(BlockModelShaper.stateToModelLocation(reference.getRegistryName(), state), state));
 
         Map<BlockState, UnbakedModel> statesToUnbakedModels = new IdentityHashMap<>();
-        ResourceLocation defaultModel = getDefaultModel(reference.getOriginBlock());
 
-        blockDefinitionProvider.getVariants(defaultModel).forEach((properties, variant) -> {
+        blockDefinitionProvider.getVariants().forEach((properties, variant) -> {
             possibleStates.stream().filter(predicate(stateDefinition, properties)).forEach(state -> {
                 statesToUnbakedModels.put(state, variant);
             });
@@ -109,8 +125,8 @@ public abstract class ModelBakeryMixin {
                 String baseName = parts[1].substring(0, suffixIndex - 1); //remove the underscore
 
                 CommonMod.SIXWAY_SLABS.getFromBaseName(baseName).ifPresent(reference -> {
-                    BlockModel model = createBlockModel(slabType, reference);
-                    if (model != null) {
+                    if (parentModel instanceof BlockModel) {
+                        BlockModel model = createBlockModel((BlockModel) parentModel, slabType);
                         model.name = location.toString();
                         cir.setReturnValue(model);
                     }
@@ -120,40 +136,30 @@ public abstract class ModelBakeryMixin {
     }
 
 
-    private BlockModel createBlockModel(String slabType, BlockReference reference) {
-        ResourceLocation parentModel = getDefaultModel(reference.getOriginBlock());
-        UnbakedModel parent = this.getModel(parentModel);
-        if (parent instanceof BlockModel blockParent) {
-            Material top, bottom, side;
-            if (blockParent.hasTexture("#all")) {
-                top = bottom = side = blockParent.getMaterial("#all");
-            } else if (blockParent.hasTexture("#end") && blockParent.hasTexture("#side")) {
-                top = bottom = blockParent.getMaterial("#end");
-                side = blockParent.getMaterial("#side");
-            } else if (blockParent.hasTexture("#top") && blockParent.hasTexture("#side") && blockParent.hasTexture("#bottom")) {
-                top = blockParent.getMaterial("#top");
-                bottom = blockParent.getMaterial("#bottom");
-                side = blockParent.getMaterial("#side");
-            } else {
-                Set<Pair<String, String>> missingTextures = Sets.newLinkedHashSet();
-                Optional<Material> material = blockParent.getMaterials(this::getModel, missingTextures).stream().findFirst();
-                if (material.isPresent()) {
-                    top = bottom = side = material.get();
-                } else {
-                    return null;
-                }
-            }
-            return SixwaySlabModelHelper.getReplacedModel(slabType, top.texture(), bottom.texture(), side.texture());
+    private BlockModel createBlockModel(BlockModel parent, String slabType) {
+        Material top, bottom, side;
+
+        if (parent.hasTexture("#all")) {
+            top = bottom = side = parent.getMaterial("#all");
+        } else if (parent.hasTexture("#end") && parent.hasTexture("#side")) {
+            top = bottom = parent.getMaterial("#end");
+            side = parent.getMaterial("#side");
+        } else if (parent.hasTexture("#top") && parent.hasTexture("#side") && parent.hasTexture("#bottom")) {
+            top = parent.getMaterial("#top");
+            bottom = parent.getMaterial("#bottom");
+            side = parent.getMaterial("#side");
+        } else {
+            Optional<Material> material = parent.getMaterials(this::getModel, Sets.newLinkedHashSet()).stream().findFirst();
+            top = bottom = side = material.orElse(new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation()));
         }
-        return null;
+        return SixwaySlabModelHelper.getReplacedModel(slabType, top.texture(), bottom.texture(), side.texture());
     }
 
+    /**
+     * Returns the first model location it can find from the default unbaked model
+     */
     private ResourceLocation getDefaultModel(Block block) {
-        BlockState defaultState = block.defaultBlockState();
-        if (block instanceof SlabBlock) {
-            defaultState = defaultState.setValue(BlockStateProperties.SLAB_TYPE, SlabType.DOUBLE);
-        }
-        UnbakedModel model = this.getModel(BlockModelShaper.stateToModelLocation(defaultState));
+        UnbakedModel model = getDefaultUnbakedModel(block);
         if (model instanceof MultiVariant multiVariant) {
             return multiVariant.getVariants().get(0).getModelLocation();
         } else if (model instanceof MultiPart multiPart) {
@@ -162,5 +168,16 @@ public abstract class ModelBakeryMixin {
             return new ResourceLocation(blockModel.name);
         }
         return MISSING_MODEL_LOCATION;
+    }
+
+    /**
+     * gets the UnbakedModel(A MultiVariant/MultiPart) for the default state of the block.
+     */
+    private UnbakedModel getDefaultUnbakedModel(Block block) {
+        BlockState defaultState = block.defaultBlockState();
+        if (block instanceof SlabBlock) {
+            defaultState = defaultState.setValue(BlockStateProperties.SLAB_TYPE, SlabType.DOUBLE);
+        }
+        return this.getModel(BlockModelShaper.stateToModelLocation(defaultState));
     }
 }

@@ -79,6 +79,12 @@ minecraft {
 
 repositories {
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 mixin {
@@ -94,6 +100,9 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.4-SNAPSHOT:processor'
 
+    runtimeOnly(fg.deobf("curse.maven:abd-305840:3542912"))
+    runtimeOnly(fg.deobf("curse.maven:unearthed-406825:3647198"))
+    runtimeOnly(fg.deobf("curse.maven:mores-556697:3593783"))
     compileOnly project(":Common")
 }
 

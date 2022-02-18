@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 public class BlockMagicFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        CommonMod.onModConstruction();
+        CommonMod.init();
         Registration.registerBlocks(new RegistryHelperFabric<>(Registry.BLOCK));
         Registration.registerItems(new RegistryHelperFabric<>(Registry.ITEM));
     }
