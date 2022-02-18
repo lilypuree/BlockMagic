@@ -13,7 +13,7 @@ public class ReferenceHolder {
     private Set<ResourceLocation> origins;
 
     public ReferenceHolder(Set<ResourceLocation> generated, Set<ResourceLocation> whitelist, Set<ResourceLocation> blacklist) {
-        sixwaySlabReferences = new HashMap<>();
+        sixwaySlabReferences = new LinkedHashMap<>();
         generated.removeAll(blacklist);
         for (ResourceLocation blacklisted : blacklist) {
             if (whitelist.remove(blacklisted)) {
